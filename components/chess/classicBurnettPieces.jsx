@@ -3,12 +3,13 @@
  * Palette swaps fills/strokes only — silhouette stays “classic”.
  */
 
-function SvgWrap({ children }) {
+function SvgWrap({ children, squareWidth }) {
+  const size = Number(squareWidth) > 0 ? Number(squareWidth) : 45;
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      width="100%"
-      height="100%"
+      width={size}
+      height={size}
       viewBox="0 0 45 45"
       aria-hidden="true"
       style={{ display: "block" }}
@@ -23,14 +24,14 @@ function SvgWrap({ children }) {
 
 /** @param {{ w: WhitePalette; b: BlackPalette }} palette */
 
-export function ClassicBurnettPiece({ pieceKey, palette }) {
+export function ClassicBurnettPiece({ pieceKey, palette, squareWidth }) {
   const pw = palette.w;
   const pb = palette.b;
 
   switch (pieceKey) {
     case "wP":
       return (
-        <SvgWrap>
+        <SvgWrap squareWidth={squareWidth}>
           <path
             d="m 22.5,9 c -2.21,0 -4,1.79 -4,4 0,0.89 0.29,1.71 0.78,2.38 C 17.33,16.5 16,18.59 16,21 c 0,2.03 0.94,3.84 2.41,5.03 C 15.41,27.09 11,31.58 11,39.5 H 34 C 34,31.58 29.59,27.09 26.59,26.03 28.06,24.84 29,23.03 29,21 29,18.59 27.67,16.5 25.72,15.38 26.21,14.71 26.5,13.89 26.5,13 c 0,-2.21 -1.79,-4 -4,-4 z"
             style={{
@@ -46,7 +47,7 @@ export function ClassicBurnettPiece({ pieceKey, palette }) {
 
     case "bP":
       return (
-        <SvgWrap>
+        <SvgWrap squareWidth={squareWidth}>
           <path
             d="m 22.5,9 c -2.21,0 -4,1.79 -4,4 0,0.89 0.29,1.71 0.78,2.38 C 17.33,16.5 16,18.59 16,21 c 0,2.03 0.94,3.84 2.41,5.03 C 15.41,27.09 11,31.58 11,39.5 H 34 C 34,31.58 29.59,27.09 26.59,26.03 28.06,24.84 29,23.03 29,21 29,18.59 27.67,16.5 25.72,15.38 26.21,14.71 26.5,13.89 26.5,13 c 0,-2.21 -1.79,-4 -4,-4 z"
             style={{
@@ -62,7 +63,7 @@ export function ClassicBurnettPiece({ pieceKey, palette }) {
 
     case "wR":
       return (
-        <SvgWrap>
+        <SvgWrap squareWidth={squareWidth}>
           <g
             style={{
               fill: pw.fill,
@@ -85,7 +86,7 @@ export function ClassicBurnettPiece({ pieceKey, palette }) {
 
     case "bR":
       return (
-        <SvgWrap>
+        <SvgWrap squareWidth={squareWidth}>
           <g
             style={{
               fill: pb.fill,
@@ -112,7 +113,7 @@ export function ClassicBurnettPiece({ pieceKey, palette }) {
 
     case "wN":
       return (
-        <SvgWrap>
+        <SvgWrap squareWidth={squareWidth}>
           <g
             style={{
               fill: "none",
@@ -139,7 +140,7 @@ export function ClassicBurnettPiece({ pieceKey, palette }) {
 
     case "bN":
       return (
-        <SvgWrap>
+        <SvgWrap squareWidth={squareWidth}>
           <g
             style={{
               fill: "none",
@@ -170,7 +171,7 @@ export function ClassicBurnettPiece({ pieceKey, palette }) {
 
     case "wB":
       return (
-        <SvgWrap>
+        <SvgWrap squareWidth={squareWidth}>
           <g
             style={{
               fill: "none",
@@ -195,7 +196,7 @@ export function ClassicBurnettPiece({ pieceKey, palette }) {
 
     case "bB":
       return (
-        <SvgWrap>
+        <SvgWrap squareWidth={squareWidth}>
           <g
             style={{
               fill: "none",
@@ -220,7 +221,7 @@ export function ClassicBurnettPiece({ pieceKey, palette }) {
 
     case "wQ":
       return (
-        <SvgWrap>
+        <SvgWrap squareWidth={squareWidth}>
           <g style={{ fill: pw.fill, stroke: pw.stroke, strokeWidth: 1.5, strokeLinejoin: "round" }}>
             <path d="M 9,26 C 17.5,24.5 30,24.5 36,26 L 38.5,13.5 L 31,25 L 30.7,10.9 L 25.5,24.5 L 22.5,10 L 19.5,24.5 L 14.3,10.9 L 14,25 L 6.5,13.5 L 9,26 z" />
             <path d="M 9,26 C 9,28 10.5,28 11.5,30 C 12.5,31.5 12.5,31 12,33.5 C 10.5,34.5 11,36 11,36 C 9.5,37.5 11,38.5 11,38.5 C 17.5,39.5 27.5,39.5 34,38.5 C 34,38.5 35.5,37.5 34,36 C 34,36 34.5,34.5 33,33.5 C 32.5,31 32.5,31.5 33.5,30 C 34.5,28 36,28 36,26 C 27.5,24.5 17.5,24.5 9,26 z" />
@@ -237,7 +238,7 @@ export function ClassicBurnettPiece({ pieceKey, palette }) {
 
     case "bQ":
       return (
-        <SvgWrap>
+        <SvgWrap squareWidth={squareWidth}>
           <g style={{ fill: pb.fill, stroke: pb.stroke, strokeWidth: 1.5, strokeLinecap: "round", strokeLinejoin: "round" }}>
             <path d="M 9,26 C 17.5,24.5 30,24.5 36,26 L 38.5,13.5 L 31,25 L 30.7,10.9 L 25.5,24.5 L 22.5,10 L 19.5,24.5 L 14.3,10.9 L 14,25 L 6.5,13.5 L 9,26 z" style={{ strokeLinecap: "butt", fill: pb.fill }} />
             <path d="m 9,26 c 0,2 1.5,2 2.5,4 1,1.5 1,1 0.5,3.5 -1.5,1 -1,2.5 -1,2.5 -1.5,1.5 0,2.5 0,2.5 6.5,1 16.5,1 23,0 0,0 1.5,-1 0,-2.5 0,0 0.5,-1.5 -1,-2.5 -0.5,-2.5 -0.5,-2 0.5,-3.5 1,-2 2.5,-2 2.5,-4 -8.5,-1.5 -18.5,-1.5 -27,0 z" />
@@ -261,7 +262,7 @@ export function ClassicBurnettPiece({ pieceKey, palette }) {
 
     case "wK":
       return (
-        <SvgWrap>
+        <SvgWrap squareWidth={squareWidth}>
           <g
             style={{
               fill: "none",
@@ -287,7 +288,7 @@ export function ClassicBurnettPiece({ pieceKey, palette }) {
 
     case "bK":
       return (
-        <SvgWrap>
+        <SvgWrap squareWidth={squareWidth}>
           <g
             style={{
               fill: "none",
@@ -334,16 +335,16 @@ export function makeClassicPalettePieces(setKey) {
   const palette = PALETTES[setKey];
   if (!palette) return null;
 
-  const mk = (key) => ({ isDragging = false } = {}) => (
+  const mk = (key) => ({ squareWidth, isDragging = false } = {}) => (
     <div
       style={{
-        width: "100%",
-        height: "100%",
+        width: Number(squareWidth) > 0 ? squareWidth : 45,
+        height: Number(squareWidth) > 0 ? squareWidth : 45,
         transform: isDragging ? "scale(0.86)" : "none",
         transformOrigin: "center",
       }}
     >
-      <ClassicBurnettPiece pieceKey={key} palette={palette} />
+      <ClassicBurnettPiece pieceKey={key} palette={palette} squareWidth={squareWidth} />
     </div>
   );
 
