@@ -191,8 +191,18 @@ export function MultiplayerGameClient() {
   );
 
   const shareUrl = useMemo(() => {
-    if (!roomId || typeof window === "undefined") return "";
-    return `${window.location.origin}/multiplayer?room=${roomId}`;
+    if (!roomId) return "";
+    const appUrl =
+      typeof process.env.NEXT_PUBLIC_APP_URL === "string"
+        ? process.env.NEXT_PUBLIC_APP_URL.trim()
+        : "";
+    if (appUrl) {
+      return `${appUrl.replace(/\/+$/, "")}/multiplayer?room=${roomId}`;
+    }
+    if (typeof window !== "undefined") {
+      return `${window.location.origin}/multiplayer?room=${roomId}`;
+    }
+    return "";
   }, [roomId]);
 
   const copyLink = useCallback(async () => {
