@@ -1,0 +1,125 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function changedKeys() {
+      return request.resource.data.diff(resource.data).changedKeys();
+    }
+
+    function onlyAllows(keys) {
+      return changedKeys().hasOnly(keys);
+    }
+
+    function userCreatesOwnDoc() {
+      return request.auth != null
+        && request.auth.uid == userId
+        && request.resource.data.userId == userId;
+    }
+
+    function userUpdatesOwnDoc() {
+      return request.auth != null
+        && request.auth.uid == userId
+        && resource.data.userId == userId;
+    }
+
+    match /users/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+
+      allow create: if userCreatesOwnDoc()
+        // Prevent clients from minting premium/economy/analytics fields at signup time.
+        && !request.resource.data.keys().hasAny([
+          "premium",
+          "economy",
+          "progress",
+          "coach",
+          "cosmetics"
+        ]);
+
+      allow update: if userUpdatesOwnDoc()
+        // Clients may update profile basics + nested settings + cosmetics selection only.
+        && (
+          onlyAllows([
+            "email",
+            "username",
+            "updatedAt",
+            "settings",
+            "cosmetics.activePieceSet"
+          ])
+          || onlyAllows([
+            "email",
+            "username",
+            "updatedAt",
+            "settings"
+          ])
+        )
+        // Never allow direct writes to anti-cheat / billing fields.
+        && !request.resource.data.keys().hasAny([
+          "premium",
+          "economy",
+          "progress",
+          "coach"
+        ])
+        && (!request.resource.data.keys().hasAny(["cosmetics"])
+            || request.resource.data.cosmetics.keys().hasOnly(["activePieceSet"]));
+
+      allow delete: if false;
+
+      match /quizAttempts/{attemptId} {
+        allow read: if request.auth != null && request.auth.uid == userId;
+
+        // Attempt documents should be created only by trusted server code (Firebase Admin).
+        // Keep client writes blocked.
+        allow create, update, delete: if false;
+      }
+
+      match /analyses/{analysisId} {
+        allow read: if request.auth != null && request.auth.uid == userId;
+        // Analysis documents should be created only by trusted server code (Firebase Admin).
+        allow create, update, delete: if false;
+      }
+    }
+
+    // Public, read-only-ish view for leaderboard (no emails here).
+    match /publicUsers/{userId} {
+      allow read: if true;
+      allow create: if request.auth != null
+        && request.auth.uid == userId
+        && request.resource.data.userId == userId;
+      allow update: if request.auth != null
+        && request.auth.uid == userId
+        && resource.data.userId == userId
+        && changedKeys().hasOnly([
+          "username",
+          "elo",
+          "xp",
+          "level",
+          "updatedAt"
+        ]);
+      allow delete: if false;
+    }
+
+    // Published learning content (read-only for clients).
+    match /quizzes/{quizId} {
+      allow read: if resource.data.isPublished == true;
+      allow create, update, delete: if false;
+
+      match /questions/{questionId} {
+        allow read: if get(/databases/$(database)/documents/quizzes/$(quizId)).data.isPublished == true;
+        allow create, update, delete: if false;
+      }
+    }
+
+    match /lessons/{lessonId} {
+      allow read: if resource.data.isPublished == true;
+      allow create, update, delete: if false;
+    }
+
+    match /chessGames/{gameId} {
+      allow read: if request.auth != null
+        && resource.data.userId == request.auth.uid;
+      allow create: if request.auth != null
+        && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if false;
+    }
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "name": "chess-app",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "postinstall": "node scripts/copy-stockfish.mjs",
+    "seed:quizzes": "node scripts/seed-quizzes.mjs"
+  },
+  "dependencies": {
+    "@tailwindcss/postcss": "^4.2.4",
+    "autoprefixer": "^10.5.0",
+    "chess.js": "^1.0.0",
+    "firebase": "^12.12.1",
+    "firebase-admin": "^13.8.0",
+    "next": "^15.0.0",
+    "openai": "^6.35.0",
+    "postcss": "^8.5.12",
+    "react": "^19.0.0",
+    "react-chessboard": "^4.7.0",
+    "react-dom": "^19.0.0",
+    "stockfish.js": "^10.0.2",
+    "stripe": "^22.1.0",
+    "tailwindcss": "^4.2.4"
+  }
+}
