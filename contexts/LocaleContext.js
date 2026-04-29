@@ -240,6 +240,7 @@ const STRINGS = {
 
     coach_brilliant: "Бриллиант",
     coach_good: "Хороший",
+    coach_neutral: "Нейтральный",
     coach_inaccuracy: "Неточность",
     coach_mistake: "Ошибка",
     coach_blunder: "Зевок",
@@ -490,6 +491,7 @@ const STRINGS = {
 
     coach_brilliant: "Brilliant",
     coach_good: "Good",
+    coach_neutral: "Neutral",
     coach_inaccuracy: "Inaccuracy",
     coach_mistake: "Mistake",
     coach_blunder: "Blunder",
@@ -587,6 +589,8 @@ export function LocaleProvider({ children }) {
           return t("coach_brilliant");
         case "good":
           return t("coach_good");
+        case "neutral":
+          return t("coach_neutral");
         case "inaccuracy":
           return t("coach_inaccuracy");
         case "mistake":

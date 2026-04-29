@@ -4,6 +4,7 @@ import {
   classifyMoveFromMoverGain,
   evalToWhiteCp,
   moverLossCp,
+  orientEvalToWhitePov,
 } from "../../../../lib/coachEngine";
 import { FREE_MONTHLY_ANALYSIS_LIMIT } from "../../../../lib/economyConstants";
 import { getAdminDb } from "../../../../lib/firebaseAdmin";
@@ -20,36 +21,66 @@ const GPT_CHUNK_SIZE = 22;
 
 function fallbackGptComment(locale, label, san) {
   const s = String(san || "?");
+  const moverTextRu = (mover) => (mover === "b" ? "чёрных" : "белых");
+  const moverTextEn = (mover) => (mover === "b" ? "Black" : "White");
+  return (mover) => {
   if (locale === "ru") {
     switch (label) {
       case "brilliant":
-        return `Сильный ход ${s}: по оценке движка позиция заметно улучшилась.`;
+          return `Ход ${s} за ${moverTextRu(mover)} — бриллиант: оценка заметно улучшилась.`;
       case "good":
-        return `Спокойный ход ${s}: без серьёзных потерь по оценке.`;
+          return `Ход ${s} за ${moverTextRu(mover)} хороший: без серьёзных потерь по оценке.`;
+        case "neutral":
+          return `Ход ${s} за ${moverTextRu(mover)} нейтральный: стартовая/ровная позиция почти не изменилась.`;
       case "inaccuracy":
-        return `Неточность ${s}: можно было сыграть точнее.`;
+          return `Неточность ${s} за ${moverTextRu(mover)}: можно было сыграть точнее.`;
       case "mistake":
-        return `Ошибка ${s}: позиция заметно ослабла.`;
+          return `Ошибка ${s} за ${moverTextRu(mover)}: позиция заметно ослабла.`;
       case "blunder":
-        return `Зевок ${s}: резкое ухудшение позиции.`;
+          return `Зевок ${s} за ${moverTextRu(mover)}: резкое ухудшение позиции.`;
       default:
-        return `Ход ${s}: оценка основана на движке; см. метку выше.`;
+          return `Ход ${s} за ${moverTextRu(mover)}: оценка основана на движке; см. метку выше.`;
     }
   }
   switch (label) {
     case "brilliant":
-      return `Strong move ${s}: the evaluation improves clearly.`;
+        return `${moverTextEn(mover)} move ${s} is brilliant: evaluation improves clearly.`;
     case "good":
-      return `Solid move ${s}: no major evaluation swing.`;
+        return `${moverTextEn(mover)} move ${s} is good: no major evaluation swing.`;
+      case "neutral":
+        return `${moverTextEn(mover)} move ${s} is neutral: opening/equal position remains stable.`;
     case "inaccuracy":
-      return `Inaccuracy ${s}: there were more precise options.`;
+        return `${moverTextEn(mover)} move ${s} is an inaccuracy: there were more precise options.`;
     case "mistake":
-      return `Mistake ${s}: the position worsens noticeably.`;
+        return `${moverTextEn(mover)} move ${s} is a mistake: the position worsens noticeably.`;
     case "blunder":
-      return `Blunder ${s}: a serious evaluation drop.`;
+        return `${moverTextEn(mover)} move ${s} is a blunder: a serious evaluation drop.`;
     default:
-      return `Move ${s}: engine-based assessment (see label above).`;
+        return `${moverTextEn(mover)} move ${s}: engine-based assessment (see label above).`;
+    }
+  };
+}
+
+function isNeutralOpeningMove({ index, moverGainCp, cpAfter }) {
+  if (index > 11) return false;
+  if (Math.abs(Number(moverGainCp) || 0) > 18) return false;
+  if (Math.abs(Number(cpAfter) || 0) > 80) return false;
+  return true;
+}
+
+function withLabelAdjustments(row) {
+  const cpAfter = Number(row.cpAfter) || 0;
+  if (isNeutralOpeningMove({ index: row.index, moverGainCp: row.moverGainCp, cpAfter })) {
+    return { ...row, label: "neutral" };
   }
+  return row;
+}
+
+function fallbackRows(locale, rows) {
+  return rows.map((m) => ({
+    ...m,
+    gptComment: fallbackGptComment(locale, m.label, m.san)(m.mover),
+  }));
 }
 
 async function explainMovesWithGpt({ locale, moves }) {
@@ -61,7 +92,7 @@ async function explainMovesWithGpt({ locale, moves }) {
         : " (GPT not configured — add OPENAI_API_KEY for richer text.)";
     return moves.map((m) => ({
       ...m,
-      gptComment: fallbackGptComment(locale, m.label, m.san) + suffix,
+      gptComment: fallbackGptComment(locale, m.label, m.san)(m.mover) + suffix,
     }));
   }
 
@@ -120,7 +151,7 @@ async function explainMovesWithGpt({ locale, moves }) {
   return moves.map((m) => ({
     ...m,
     gptComment:
-      byIdx.get(m.index) || fallbackGptComment(locale, m.label, m.san),
+      byIdx.get(m.index) || fallbackGptComment(locale, m.label, m.san)(m.mover),
   }));
 }
 
@@ -163,8 +194,8 @@ export async function POST(req) {
     for (let i = 0; i < movesSan.length; i++) {
       const san = movesSan[i];
       const mover = i % 2 === 0 ? "w" : "b";
-      const evBefore = evals[i];
-      const evAfter = evals[i + 1];
+      const evBefore = orientEvalToWhitePov(evals[i], mover);
+      const evAfter = orientEvalToWhitePov(evals[i + 1], mover === "w" ? "b" : "w");
       const loss = moverLossCp(evBefore, evAfter, mover);
       const label = classifyMoveFromMoverGain(-loss);
 
@@ -180,17 +211,15 @@ export async function POST(req) {
         moverGainCp: -loss,
       });
     }
+    const adjustedRows = rows.map(withLabelAdjustments);
 
     let enriched;
     try {
-      enriched = await explainMovesWithGpt({ locale, moves: rows });
+      enriched = await explainMovesWithGpt({ locale, moves: adjustedRows });
     } catch (e) {
       // Do not fail full analysis when OpenAI is temporarily unavailable.
       console.error("coach.analyze gpt fallback:", e);
-      enriched = rows.map((m) => ({
-        ...m,
-        gptComment: fallbackGptComment(locale, m.label, m.san),
-      }));
+      enriched = fallbackRows(locale, adjustedRows);
     }
 
     const analysisDoc = {
