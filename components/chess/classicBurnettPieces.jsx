@@ -334,7 +334,18 @@ export function makeClassicPalettePieces(setKey) {
   const palette = PALETTES[setKey];
   if (!palette) return null;
 
-  const mk = (key) => () => <ClassicBurnettPiece pieceKey={key} palette={palette} />;
+  const mk = (key) => ({ isDragging = false } = {}) => (
+    <div
+      style={{
+        width: "100%",
+        height: "100%",
+        transform: isDragging ? "scale(0.86)" : "none",
+        transformOrigin: "center",
+      }}
+    >
+      <ClassicBurnettPiece pieceKey={key} palette={palette} />
+    </div>
+  );
 
   return {
     wP: mk("wP"),

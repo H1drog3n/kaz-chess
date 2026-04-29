@@ -76,7 +76,7 @@ const STRINGS = {
       "Ссылка для сброса пароля отправлена на вашу почту",
     invalid_credentials: "Неверные данные",
     firebase_env_hint:
-      "Firebase не настроен. Проверь .env.local.",
+      "Firebase не настроен: локально добавь NEXT_PUBLIC_FIREBASE_* в .env.local и перезапусти dev; на сайте с Vercel — те же ключи в Environment Variables для Production и Redeploy.",
     toast_account_created: "Аккаунт создан",
 
     // Settings
@@ -325,7 +325,8 @@ const STRINGS = {
       "If the email is registered, you will receive a reset link.",
     reset_sent: "Password reset link sent to your email",
     invalid_credentials: "Invalid credentials",
-    firebase_env_hint: "Firebase not configured. Check .env.local.",
+    firebase_env_hint:
+      "Firebase not configured: add NEXT_PUBLIC_FIREBASE_* to .env.local locally (restart dev), or in Vercel → Environment Variables for Production, then Redeploy.",
     toast_account_created: "Account created",
 
     // Settings

@@ -181,7 +181,17 @@ export async function POST(req) {
       });
     }
 
-    const enriched = await explainMovesWithGpt({ locale, moves: rows });
+    let enriched;
+    try {
+      enriched = await explainMovesWithGpt({ locale, moves: rows });
+    } catch (e) {
+      // Do not fail full analysis when OpenAI is temporarily unavailable.
+      console.error("coach.analyze gpt fallback:", e);
+      enriched = rows.map((m) => ({
+        ...m,
+        gptComment: fallbackGptComment(locale, m.label, m.san),
+      }));
+    }
 
     const analysisDoc = {
       gameId,
