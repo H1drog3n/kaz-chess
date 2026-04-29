@@ -27,36 +27,36 @@ function fallbackGptComment(locale, label, san) {
   if (locale === "ru") {
     switch (label) {
       case "brilliant":
-          return `Ход ${s} за ${moverTextRu(mover)} — бриллиант: оценка заметно улучшилась.`;
+          return `Ход ${s} за ${moverTextRu(mover)} — бриллиант. Он резко улучшает координацию фигур и создает активный план с инициативой. В продолжении сопернику сложнее защищаться: часто возникают тактические удары вроде вилки, связки или решающего вторжения по открытой линии.`;
       case "good":
-          return `Ход ${s} за ${moverTextRu(mover)} хороший: без серьёзных потерь по оценке.`;
+          return `Ход ${s} за ${moverTextRu(mover)} хороший. Он сохраняет баланс и улучшает позицию без лишнего риска. Дальше это обычно дает комфортную игру: больше полезных ходов и меньше шансов допустить тактический удар в ответ.`;
         case "neutral":
-          return `Ход ${s} за ${moverTextRu(mover)} нейтральный: стартовая/ровная позиция почти не изменилась.`;
+          return `Ход ${s} за ${moverTextRu(mover)} нейтральный. В ровной или дебютной позиции он почти не меняет оценку и не создает немедленных угроз. Это не ошибка, но и без давления: чтобы получить преимущество, нужно точнее развивать фигуры и бороться за ключевые поля.`;
       case "inaccuracy":
-          return `Неточность ${s} за ${moverTextRu(mover)}: можно было сыграть точнее.`;
+          return `Неточность ${s} за ${moverTextRu(mover)}. Идея хода понятна, но выполнена не самым точным способом, поэтому часть преимущества теряется. В дальнейшем соперник может перехватить инициативу и получить тактический ресурс — например, темп с угрозой вилки или связки.`;
       case "mistake":
-          return `Ошибка ${s} за ${moverTextRu(mover)}: позиция заметно ослабла.`;
+          return `Ошибка ${s} за ${moverTextRu(mover)}. После этого позиция заметно слабеет: ухудшается безопасность короля или координация фигур. В продолжении соперник нередко получает форсированный план с материальным выигрышем либо сильной атакой.`;
       case "blunder":
-          return `Зевок ${s} за ${moverTextRu(mover)}: резкое ухудшение позиции.`;
+          return `Зевок ${s} за ${moverTextRu(mover)}. Ход допускает резкий тактический провал: потерю материала или критическое ослабление короля. Обычно дальше у соперника появляется конкретная комбинация (вилка, связка, вскрытое нападение), и позицию уже очень трудно спасти точной защитой.`;
       default:
-          return `Ход ${s} за ${moverTextRu(mover)}: оценка основана на движке; см. метку выше.`;
+          return `Ход ${s} за ${moverTextRu(mover)} оценен движком как рабочий. Посмотри метку качества и сравни с альтернативами: часто разница в одном темпе меняет инициативу. Главная цель — понять, какой план ход улучшает и какие тактические риски оставляет.`;
     }
   }
   switch (label) {
     case "brilliant":
-        return `${moverTextEn(mover)} move ${s} is brilliant: evaluation improves clearly.`;
+        return `${moverTextEn(mover)} move ${s} is brilliant. It sharply improves piece coordination and creates active play with initiative. In practical continuation, this often leads to tactical chances such as forks, pins, or a decisive invasion on open lines.`;
     case "good":
-        return `${moverTextEn(mover)} move ${s} is good: no major evaluation swing.`;
+        return `${moverTextEn(mover)} move ${s} is good. It keeps the position healthy and improves play without unnecessary risk. Going forward, it usually gives easier plans and reduces the opponent's tactical counterplay.`;
       case "neutral":
-        return `${moverTextEn(mover)} move ${s} is neutral: opening/equal position remains stable.`;
+        return `${moverTextEn(mover)} move ${s} is neutral. In an opening/equal position it keeps the evaluation almost unchanged and creates no immediate pressure. It is not a mistake, but stronger follow-up moves are needed to gain initiative.`;
     case "inaccuracy":
-        return `${moverTextEn(mover)} move ${s} is an inaccuracy: there were more precise options.`;
+        return `${moverTextEn(mover)} move ${s} is an inaccuracy. The idea is playable, but less precise than the best continuation, so part of the edge slips away. This can allow the opponent to seize initiative and generate tactical threats (for example a fork or pin with tempo).`;
     case "mistake":
-        return `${moverTextEn(mover)} move ${s} is a mistake: the position worsens noticeably.`;
+        return `${moverTextEn(mover)} move ${s} is a mistake. The position worsens clearly, often due to king safety or poor piece coordination. In many lines the opponent gets a forcing plan with material gain or a lasting attack.`;
     case "blunder":
-        return `${moverTextEn(mover)} move ${s} is a blunder: a serious evaluation drop.`;
+        return `${moverTextEn(mover)} move ${s} is a blunder. It allows a major tactical collapse: material loss or critical king exposure. The opponent typically has a concrete sequence (fork, pin, discovered attack), and accurate defense becomes very difficult.`;
     default:
-        return `${moverTextEn(mover)} move ${s}: engine-based assessment (see label above).`;
+        return `${moverTextEn(mover)} move ${s} is assessed by the engine as serviceable. Use the label and alternatives to understand why one tempo changes who controls the game. The key is to connect the move with a clear plan and the tactical risks it leaves behind.`;
     }
   };
 }
@@ -100,8 +100,8 @@ async function explainMovesWithGpt({ locale, moves }) {
 
   const system =
     locale === "ru"
-      ? "Ты шахматный тренер. Для каждого хода из запроса напиши короткий комментарий на русском (1–2 предложения). Учитывай метку brilliant/good/inaccuracy/mistake/blunder и числовые поля оценки."
-      : "You are a chess coach. For each move in the request, write a short comment (1–2 sentences) in English. Use labels brilliant/good/inaccuracy/mistake/blunder and the numeric evaluation fields.";
+      ? "Ты шахматный тренер. Для каждого хода напиши содержательный комментарий на русском в 2–3 предложениях. Формат: (1) качество хода по метке, (2) почему это хорошо/плохо позиционно или тактически, (3) что может случиться дальше (план, угроза, типовой тактический мотив: вилка/связка/вскрытое нападение/атака на короля). Пиши понятно, без воды и без фантазий, опираясь на cpBefore/cpAfter/moverGainCp."
+      : "You are a chess coach. For each move, write a meaningful 2–3 sentence comment in English. Structure: (1) move quality by label, (2) why it is good/bad positionally or tactically, (3) likely consequence in the next phase (plan, threat, or tactical motif like fork/pin/discovered attack/king attack). Be concrete, avoid fluff and speculation, and use cpBefore/cpAfter/moverGainCp.";
 
   const byIdx = new Map();
 
@@ -127,7 +127,7 @@ async function explainMovesWithGpt({ locale, moves }) {
         {
           role: "user",
           content:
-            "Return JSON ONLY: {comments:[{index:number, comment:string}]} — one comment per move index from this chunk. Indices must match exactly. No markdown.",
+            "Return JSON ONLY: {comments:[{index:number, comment:string}]} — one comment per move index from this chunk, each comment 2–3 sentences. Indices must match exactly. No markdown.",
         },
         { role: "user", content: user },
       ],
