@@ -51,6 +51,7 @@ export function MultiplayerGameClient() {
   const [room, setRoom] = useState(null);
   const [roomErr, setRoomErr] = useState(null);
   const [joining, setJoining] = useState(false);
+  const [copied, setCopied] = useState(false);
   const [boardThemeKey, setBoardThemeKey] = useState("classic");
   const [pieceSetKey, setPieceSetKey] = useState("classic");
 
@@ -197,9 +198,23 @@ export function MultiplayerGameClient() {
   const copyLink = useCallback(async () => {
     if (!shareUrl) return;
     try {
-      await navigator.clipboard.writeText(shareUrl);
+      if (navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(shareUrl);
+      } else {
+        const ta = document.createElement("textarea");
+        ta.value = shareUrl;
+        ta.setAttribute("readonly", "");
+        ta.style.position = "absolute";
+        ta.style.left = "-9999px";
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+      }
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
     } catch {
-      // ignore
+      setRoomErr("Не удалось скопировать автоматически. Скопируй ссылку вручную.");
     }
   }, [shareUrl]);
 
@@ -253,6 +268,11 @@ export function MultiplayerGameClient() {
               <button type="button" onClick={copyLink} className="rounded border px-3 py-1">
                 Копировать ссылку
               </button>
+              {copied && (
+                <span className="text-xs text-emerald-600 dark:text-emerald-400">
+                  Скопировано
+                </span>
+              )}
               {!myColor && (
                 <button
                   type="button"
