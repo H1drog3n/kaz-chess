@@ -224,6 +224,12 @@ export function LobbyClient() {
         >
           {t("lobby_cta")}
         </button>
+        <Link
+          href="/multiplayer"
+          className="mt-3 block w-full rounded-xl border border-zinc-300 px-6 py-3 text-center text-sm font-semibold text-zinc-900 hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-100 dark:hover:bg-zinc-800"
+        >
+          Мультиплеер: игра с другом по ссылке
+        </Link>
       </section>
 
       <p className="mt-6 text-center text-xs text-zinc-500">
